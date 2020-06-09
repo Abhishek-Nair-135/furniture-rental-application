@@ -73,6 +73,8 @@
   include("header.php");
   include("config.php");
 
+  $_SESSION['booking_id'] = 0;
+
   if (isset($_POST['login'])) {
     $email = $_POST['name'];
     $password = $_POST['password'];
@@ -141,7 +143,7 @@
   }
 
   if (isset($_POST['checkout'])) {
-    date_default_timezone_set("Asia/Kolkata");
+    /* date_default_timezone_set("Asia/Kolkata");
     $from_date = date("Y-m-d h:i:s");
     $date = date_create($from_date);
 
@@ -153,23 +155,25 @@
       $booking_id_query = mysqli_query($dbh, $booking_id_stmt);
       $booking_id = mysqli_fetch_assoc($booking_id_query);
       $_SESSION['booking_id'] = $booking_id['booking_id'];
-
+      
       foreach ($_SESSION['cart'] as $product) {
         date_add($date, date_interval_create_from_date_string($product['no_of_months'] . " months"));
         $to_date = date_format($date, "Y-m-d h:i:s");
 
         $bpm_query_stmt = "INSERT INTO booking_product_map VALUES ('','" . $booking_id['booking_id'] . "','" . $product['product_id'] . "','" . $product['quantity'] . "', '" . $from_date . "', '" . $to_date . "', '" . $product['total_price'] . "', '', '" . $product['total_price'] . "')";
         $bpm_query = mysqli_query($dbh, $bpm_query_stmt);
+
         if ($bpm_query) {
           continue;
         } else {
           echo "<script>alert('Something Went Wrong in bpm_query');</script>";
         }
       }
-      unset($_SESSION['cart']);
     } else {
       echo "<script>alert('Something Went Wrong in booking_query');</script>";
-    }
+    } */
+    $_SESSION['checkout'] = true;
+    
   }
   ?>
   <!-- Header part end-->
@@ -468,8 +472,8 @@
                   <a href="#">terms & conditions*</a>
                 </div>
                 <form method="post" action="confirmation.php">
-                  <input type="submit" name="checkout" class="btn_3" href="confirmation.php" value="Order Now!!" />
-                </form>
+                  <input type="submit" name="checkout" class="btn_3" href="#" value="Order Now!!" />
+               </form>
               </div>
             </div>
           <?php } ?>

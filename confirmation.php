@@ -35,18 +35,51 @@
     include("header.php");
     include("config.php");
 
-    $booking_id = [];
+    //$booking_id['booking_id'] = 0;
     $total_quantity = 0;
 
-    if (!isset($_POST['checkout'])) {
+    /* if (!isset($_POST['checkout'])) {
       $booking_id_stmt = "SELECT booking_id FROM bookings WHERE user_id = '" . $_SESSION['user_id'] . "' ORDER BY booking_id DESC LIMIT 1";
       $booking_id_query = mysqli_query($dbh, $booking_id_stmt);
       $booking_id = mysqli_fetch_assoc($booking_id_query);
     } else {
-      $booking_id['booking_id'] = $_SESSION['booking_id'];
+      $booking_id = $_SESSION['booking_id'];
+      $booking_id;
+      print_r($_SESSION);
+
+    } */
+    date_default_timezone_set("Asia/Kolkata");
+    $from_date = date("Y-m-d h:i:s");
+    $date = date_create($from_date);
+
+    $booking_query_stmt = "INSERT INTO bookings VALUES ('',1,'" . $_SESSION['user_id'] . "',now(),now(),'" . $_SESSION['grand_total'] . "','0','0','" . $_SESSION['grand_total'] . "','success')";
+    $booking_query = mysqli_query($dbh, $booking_query_stmt);
+
+    if ($booking_query) {
+      $booking_id_stmt = "SELECT booking_id FROM bookings WHERE user_id = '" . $_SESSION['user_id'] . "' ORDER BY booking_id DESC LIMIT 1";
+      $booking_id_query = mysqli_query($dbh, $booking_id_stmt);
+      $booking_id = mysqli_fetch_assoc($booking_id_query);
+      $_SESSION['booking_id'] = $booking_id['booking_id'];
+      
+      foreach ($_SESSION['cart'] as $product) {
+        date_add($date, date_interval_create_from_date_string($product['no_of_months'] . " months"));
+        $to_date = date_format($date, "Y-m-d h:i:s");
+
+        $bpm_query_stmt = "INSERT INTO booking_product_map VALUES ('','" . $booking_id['booking_id'] . "','" . $product['product_id'] . "','" . $product['quantity'] . "', '" . $from_date . "', '" . $to_date . "', '" . $product['total_price'] . "', '', '" . $product['total_price'] . "')";
+        $bpm_query = mysqli_query($dbh, $bpm_query_stmt);
+
+        if ($bpm_query) {
+          continue;
+        } else {
+          echo "<script>alert('Something Went Wrong in bpm_query');</script>";
+        }
+      }
+    } else {
+      echo "<script>alert('Something Went Wrong in booking_query');</script>";
     }
 
-    $order_details_stmt = "SELECT * FROM bookings WHERE booking_id = '" . $booking_id['booking_id'] . "'";
+    $order_details_stmt = "SELECT * FROM bookings WHERE booking_id = '" . $_SESSION['booking_id'] . "'";
+
     $order_details_query = mysqli_query($dbh, $order_details_stmt);
     $order_details = mysqli_fetch_assoc($order_details_query);
 
@@ -55,7 +88,8 @@
     $products_stmt = "SELECT booking_id,bpm.product_id,qty,from_date,to_date,total,p.name FROM booking_product_map bpm, products p WHERE booking_id = '" . $order_details['booking_id'] . "' AND bpm.product_id = p.product_id";
     $products_query = mysqli_query($dbh, $products_stmt);
     $products = mysqli_fetch_all($products_query, MYSQLI_ASSOC);
-
+    //unset($_SESSION['cart']);
+ 
     ?>
     <!-- Header part end-->
 
